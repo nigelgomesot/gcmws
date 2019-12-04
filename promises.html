@@ -1,0 +1,154 @@
+<!-- Task: fetch the users url using promise then fetch each item as a promise and fetch user profiles -->
+<!-- REF: https://developers.google.com/web/fundamentals/primers/promises -->
+
+<html>
+	<head>
+	</head>
+	<body>
+		<button type='button' id='logUserProfilesBtn'>log User Profiles</button>
+    <button type='button' id='logUserProfileErrorBtn'>log User Profile Error</button>
+    <button type='button' id='logAllUserProfiles1Btn'>log All User Profiles 1</button>
+    <button type='button' id='logAllUserProfiles2Btn'>log All User Profiles 2</button>
+    <button type='button' id='logAllUserProfiles3Btn'>log All User Profiles 3</button>
+
+		<script type='text/javascript'>
+			var usersPromise;
+
+      function getJSON(url) {
+        return new Promise((resolve, reject) => {
+          var delay = (Math.floor(Math.random() * 7)) + 2;
+
+          console.log(`url ${url} is waiting for ${delay} seconds`);
+
+          setTimeout(function() {
+            return fetch(url).then(response => {
+              if (response.ok) {
+                response.json().then(data => resolve(data));
+              } else {
+                reject(new Error('error'));
+              }
+            });
+          }, delay * 1000);
+
+        }, error => {
+          reject(new Error(error.message));
+        });
+      }
+
+      function getUser(index) {
+        usersPromise = usersPromise || getJSON('https://reqres.in/api/users');
+
+        return usersPromise.then((users) => {
+          let userId = users.data[index].id;
+          let userURL = `https://reqres.in/api/users/${userId}`;
+          return getJSON(userURL);
+        });
+			}
+
+      function logUserProfiles() {
+        getUser(1)
+          .then(res => {
+            console.log(res.data.id);
+            return getUser(3);
+          }).then(res => {
+            console.log(res.data.id);
+            return getUser(5);
+          }).then(res => {
+            console.log(res.data.id);
+          });
+      }
+
+			document.getElementById('logUserProfilesBtn').addEventListener('click', logUserProfiles);
+
+      function logUserProfileError() {
+        getUser(1)
+          .then(res => {
+            console.log(res.data.id);
+            return getUser(33);
+          }).then(res => {
+            console.log('success');
+          }).catch(err => {
+            console.log('failed!');
+            throw err;
+          });
+      }
+
+      document.getElementById('logUserProfileErrorBtn').addEventListener('click', logUserProfileError);
+
+      function mapUserUrls(data) {
+        return data.map(userData => {
+          let userId = userData.id;
+          return `https://reqres.in/api/users/${userId}`;
+        });
+      }
+
+      // INFO: fetches each user profile sequentially.
+      function logAllUserProfiles1() {
+        const usersPromise = getJSON('https://reqres.in/api/users');
+
+        return usersPromise.then((users) => {
+          console.log(`fetching ${users.data.length} users:`);
+
+          return users.data.reduce(function(sequencePromise, userData) {
+            return sequencePromise.then(function() {
+              let userId = userData.id;
+              let userUrl = `https://reqres.in/api/users/${userId}`;
+              return getJSON(userUrl);
+            }).then(function(user) {
+              console.log(`user:`, user);
+            });
+          }, Promise.resolve())
+        }).then(() => {
+          console.log('success');
+        }).catch((err) => {
+          console.log('error:' + err.message);
+        });
+      }
+
+      document.getElementById('logAllUserProfiles1Btn').addEventListener('click', logAllUserProfiles1);
+
+      // INFO: Resolves all user profile promises together and then logs sequentially.
+      function logAllUserProfiles2() {
+        const usersPromise = getJSON('https://reqres.in/api/users');
+
+        usersPromise.then((users) => {
+          return Promise.all(
+            mapUserUrls(users.data).map(getJSON)
+          );
+        }).then((userProfiles) => {
+          userProfiles.forEach((userProfile)=> {
+            console.log(`user:`, userProfile);
+          });
+          console.log('success');
+        }).catch((err) => {
+          console.log('error:' + err.message);
+        });
+      }
+
+      document.getElementById('logAllUserProfiles2Btn').addEventListener('click', logAllUserProfiles2);
+
+      // INFO: Resolves each user profile promise independently but logs sequentially.
+      function logAllUserProfiles3() {
+        const usersPromise = getJSON('https://reqres.in/api/users');
+
+        usersPromise.then((users) => {
+          return mapUserUrls(users.data).map(getJSON)
+            .reduce(function(sequencePromise, userProfilePromise) {
+              return sequencePromise.then(function() {
+                return userProfilePromise;
+              }).then(function(userProfile) {
+                console.log(`user:`, userProfile);
+              });
+            }, Promise.resolve());
+          }).then(() => {
+              console.log('success');
+          }).catch((err) => {
+              console.log('error:' + err.message);
+          });
+        }
+
+      document.getElementById('logAllUserProfiles3Btn').addEventListener('click', logAllUserProfiles3);
+
+		</script>
+	</body>
+</html>
