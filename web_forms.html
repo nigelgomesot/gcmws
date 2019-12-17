@@ -1,0 +1,165 @@
+<!-- REF: https://developers.google.com/web/fundamentals/design-and-ux/input/forms -->
+<html>
+	<head>
+    <style>
+      input.dirty:not(:focus):invalid {
+        background-color: #FFD9D9;
+      }
+
+      input.dirty:not(:focus):valid {
+        background-color: #D9FFD9;
+      }
+    </style>
+	</head>
+	<body>
+    <div>
+      <h2>Input Types</h2>
+      <label for='frmUrl'>URL</label>
+      <input type='url' name='frmUrl'><br/>
+      <label for='frmTel'>Phone Number</label>
+      <input type='tel' name='frmTel'><br/>
+      <label for='frmEmail'>Email</label>
+      <input type='email' name='frmEmail'><br/>
+      <label for='frmSearch'>Search</label>
+      <input type='search' name='frmSearch'><br/>
+      <label for='frmNumber'>Number</label>
+      <input type='number' name='frmNumber'><br/>
+      <label for='frmRange'>Range</label>
+      <input type='range' name='frmRange'><br/>
+      <label for='frmDateTimeLocal'>Date Time Local</label>
+      <input type='datetime-local' name='frmDateTimeLocal'><br/>
+      <label for='frmDate'>Date</label>
+      <input type='Date' name='frmDate'><br/>
+      <label for='frmTime'>Time</label>
+      <input type='time' name='frmTime'><br/>
+      <label for='frmWeek'>Week</label>
+      <input type='week' name='frmWeek'><br/>
+      <label for='frmMonth'>Month</label>
+      <input type='month' name='frmMonth'><br/>
+      <label for='frmColor'>Color</label>
+      <input type='color' name='frmColor'><br/>
+      <label for='frmDataListInput'>Data List</label>
+      <input type='text' name='frmDataListInput' list="frmDataList">
+      <datalist id="frmDataList">
+        <option value="one">
+        <option value="two">
+        <option value="three">
+      </datalist>
+    </div>
+    <div>
+      <h2>Autocomplete Types</h2>
+      <form id="frmAutoComplete">
+        <label for='frmName'>Full Name</label>
+        <input type='text' name='frmName' autocomplete="name"><br/>
+        <label for='frmFirstName'>First Name</label>
+        <input type='text' name='frmFirstName' autocomplete="given-name"><br/>
+        <label for='frmMiddleName'>Middle Name</label>
+        <input type='text' name='frmMiddleName' autocomplete="additional-name"><br/>
+        <label for='frmLastName'>Last Name</label>
+        <input type='text' name='frmLastName' autocomplete="family-name"><br/>
+        <label for='frmAddressLine1'>Address Line 1</label>
+        <input type='text' name='frmAddressLine1' autocomplete="address-line1"><br/>
+        <label for='frmAddressLine2'>Address Line 2</label>
+        <input type='text' name='frmAddressLine2' autocomplete="address-line2"><br/>
+        <label for='frmCity'>City</label>
+        <input type='text' name='frmCity' autocomplete="locality"><br/>
+        <label for='frmState'>State</label>
+        <input type='text' name='frmState' autocomplete="region"><br/>
+        <label for='frmCountry'>Country</label>
+        <input type='text' name='frmCountry' autocomplete="country"><br/>
+        <label for='frmZipcode'>Zip</label>
+        <input type='text' name='frmZipcode' autocomplete="postal-code" pattern="^\d{5,6}(?:[-\s]\d{4})?$">
+        <br/>
+        <label for='frmTel'>Phone Number</label>
+        <input type='tel' name='frmTel' autocomplete="tel"><br/>
+        <label for='frmEmail'>Email</label>
+        <input type='email' name='email' id='frmEmail' autocomplete="email"><br/>
+        <label for='frmConfirmEmail'>Confirm Email</label>
+        <input type='email' name='emailConfirm' id='frmEmailConfirm' autocomplete="email"><br/>
+        <label for='frmShoeSize'>Shoe Size</label>
+        <input type='number' name='frmShoeSize' min='1' max='11' step='0.5'><br/>
+        <label for='frmCCName'>Name on Card</label>
+        <input type='text' name='frmCCName' autocomplete="cc-name"><br/>
+        <label for='frmCCName'>Name on Card</label>
+        <input type='text' name='frmCCNumber' autocomplete="cc-number"><br/>
+        <label for='frmCCCVC'>CVC</label>
+        <input type='text' name='frmCCCVC' autocomplete="cc-csc"><br/>
+        <label for='frmCCExp'>Expiry</label>
+        <input type='text' name='frmCCExp' autocomplete="cc-exp"><br/>
+        <label for='frmUsername'>Username</label>
+        <input type='text' name='frmUsername' autocomplete="username" required><br/>
+        <label for='frmSignInPassword'>Sign In Password</label>
+        <input type='text' name='frmSignInPassword' autocomplete="current-password"
+          minlength="8" maxlength="10" required><br/>
+        <label for='frmSignUpPassword'>Sign Up Password</label>
+        <input type='text' name='frmSignUpPassword' autocomplete="new-password"
+          minlength="8" maxlength="10"><br/>
+
+        <button class='btn' id='submitAutocomplete'>submit</button>
+      </form>
+    </div>
+
+    <div>
+      <h2>Form Validity</h2>
+      <form id="frmCheckValidity" novalidate>
+        <label for='frmUsernameValidity'>Username</label>
+        <input type='text' name='frmUsernameValidity' id="frmUsernameValidity" autocomplete="username" required><br/>
+        <button class='btn' id='submitCheckValidity'>submit</button>
+      </form>
+    </div>
+
+    <script>
+    function initInputs() {
+      let inputs =  document.getElementsByTagName('input');
+      let inputs_len = inputs.length;
+      let addDirtyClass = function(event) {
+        event.srcElement.classList.toggle('dirty', true);
+      };
+
+      for (let i = 0; i < inputs_len; i++) {
+        let input = inputs[i];
+        input.addEventListener('blur', addDirtyClass);
+        input.addEventListener('valid', addDirtyClass);
+        input.addEventListener('invalid', addDirtyClass);
+      }
+    }
+
+      function initEmailConfirm() {
+        let elem = document.getElementById('frmEmailConfirm');
+        elem.addEventListener('blur', verifyEmail);
+
+        function verifyEmail(event) {
+          let confirmElem = event.srcElement;
+          let originalElem = document.getElementById('frmEmail');
+
+          if(confirmElem.value != originalElem.value) {
+            confirmElem.setCustomValidity('the 2 email addresses must match.');
+          } else {
+            confirmElem.setCustomValidity('');
+          }
+        }
+      }
+
+      function initFormValidity() {
+        let form = document.getElementById('frmCheckValidity');
+        let elem = document.getElementById('frmUsernameValidity');
+
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            alert('Validation failed (frmUsernameValidity): ' + elem.validationMessage);
+            return false;
+          } else {
+            event.preventDefault();
+            alert('Validation success');
+            return false;
+          }
+        });
+      }
+
+      initInputs();
+      initEmailConfirm();
+      initFormValidity();
+    </script>
+  </body>
+</html>
