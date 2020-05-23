@@ -1,0 +1,54 @@
+<!-- REF: https://www.geeksforgeeks.org/how-to-draw-with-mouse-in-html-5-canvas/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw Sketch</title>
+  <style>
+    #canvas {
+      border: 1px solid black;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width = "500" height = "500"></canvas>
+  <script>
+    let paint = false;
+    const coord = { x: 0, y: 0 };
+    const context = canvas.getContext('2d');
+
+    function getPosition(event) {
+      coord.x = event.clientX - canvas.offsetLeft;
+      coord.y = event.clientY - canvas.offsetTop;
+    }
+
+    function startPainting(event) {
+      paint = true;
+      getPosition(event);
+    }
+
+    function stopPainting(event) {
+      paint = false;
+    }
+
+    function sketch(event) {
+      if (!paint) return;
+
+      context.beginPath();
+      context.moveTo(coord.x, coord.y);
+
+      getPosition(event);
+
+      context.lineTo(coord.x, coord.y);
+      context.stroke();
+    }
+
+    document.addEventListener('pointerdown', startPainting);
+    document.addEventListener('pointerup', stopPainting);
+    document.addEventListener('pointermove', sketch);
+  </script>
+</body>
+</html>

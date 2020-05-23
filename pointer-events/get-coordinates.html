@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pointer Events</title>
+  <style>
+    #pointerZone {
+      width: 300px;
+      height: 300px;
+      border: 1px solid;
+      border-color: black;
+    }
+  </style>
+  <script>
+    function init() {
+      var pointerZone = document.getElementById('pointerZone');
+
+      pointerZone.addEventListener('pointerdown', pointerDownHandler, false);
+    }
+
+    function pointerDownHandler(event) {
+      var coords = document.getElementById('coords');
+
+      coords.innerHTML = `x: ${event.pageX}, y: ${event.pageY}`;
+    }
+  </script>
+</head>
+<body onload="init()">
+  <div id="pointerZone"></div>
+  <div id="coords"></div>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!-- REF: https://github.com/googlesamples/web-fundamentals/blob/gh-pages/fundamentals/design-and-ux/input/touch/touch-demo-1.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      width: 100%;
+      height: 100%;
+
+      margin: 0;
+      padding: 0;
+    }
+
+    .content {
+      padding: 32px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .swipe-element {
+      position: relative;
+      width: 100%;
+      height: 60px;
+    }
+
+    .swipe-front {
+      position: absolute;
+      width: 100%;
+      height: 60px;
+
+      left: 0;
+      top: 0;
+      margin: 0;
+      padding: 8px;
+      box-sizing: border-box;
+      text-align: center;
+      line-height: 44px;
+      vertical-align: center;
+      z-index: 2;
+      touch-action: none;
+
+      background-color: grey;
+    }
+
+    .swipe-back {
+      position: absolute;
+      display: flex;
+      width: 100%;
+      height: 60px;
+
+      left: 0;
+      top: 0;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+
+    .swipe-back button {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      border-style: none;
+
+      background-color: blue;
+    }
+
+    .swipe-back button:nth-child(2) {
+      background-color: green;
+    }
+
+    .swipe-back button:nth-child(3) {
+      background-color: yellow;
+    }
+
+    .swipe-back button:nth-child(4) {
+      background-color: red;
+    }
+
+    .promote-layer {
+      backface-visibility: hidden;
+    }
+  </style>
+  <title>Touch Demo 1</title>
+</head>
+<body>
+  <section class="content">
+    <div class="swipe-element">
+      <div class="swipe-back">
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+      </div>
+      <p class="swipe-front promote-layer">Swipe Me</p>
+    </div>
+  </section>
+  <script>
+    function SwipeRevealItem(element) {
+      var STATE_DEFAULT = 1;
+      var STATE_LEFT_SIDE = 2;
+      var STATE_RIGHT_SIDE = 3;
+
+      var swipeFrontElement = element.querySelector('.swipe-front');
+      var rafPending = false;
+      var initialTouchPos = null;
+      var lastTouchPos = null;
+      var currentXPosition = 0;
+      var currentState = STATE_DEFAULT;
+      var handleSize = 10;
+
+      var itemWidth = swipeFrontElement.clientWidth;
+      var slopeValue = itemWidth * (1/4);
+
+      this.handleGestureStart = function(evt) {
+        evt.preventDefault();
+
+        if(evt.touches && touches.length > 1) {
+          return;
+        }
+
+        evt.target.setPointerCapture(evt.pointerId);
+
+        initialTouchPos = getGesturePointFromEvent(evt);
+
+        swipeFrontElement.style.transition = 'initial';
+      }.bind(this);
+
+      this.handleGestureMove = function(evt) {
+        evt.preventDefault();
+
+        if(!initialTouchPos) {
+          return;
+        }
+
+        lastTouchPos = getGesturePointFromEvent(evt);
+
+        if (rafPending) {
+          return;
+        }
+
+        rafPending = true;
+
+        window.requestAnimationFrame(onAnimeFrame);
+      }.bind(this);
+
+      this.handleGestureEnd = function(evt) {
+        evt.preventDefault();
+
+        if (evt.touches && evt.touches.length > 0) {
+          return;
+        }
+
+        rafPending = false;
+
+        evt.target.releasePointerCapture(evt.pointerId);
+
+        updateSwipeRestPosition();
+
+        initialTouchPos = null;
+      }.bind(this);
+
+      function updateSwipeRestPosition() {
+        var differenceInX = initialTouchPos.x - lastTouchPos.x;
+        currentXPosition = currentXPosition - differenceInX;
+
+        var newState = STATE_DEFAULT;
+
+        if (Math.abs(differenceInX) > slopeValue) {
+          if (currentState === STATE_DEFAULT) {
+            if (differenceInX > 0) {
+              newState = STATE_LEFT_SIDE;
+            } else {
+              newState = STATE_RIGHT_SIDE;
+            }
+          } else {
+            if (currentState === STATE_LEFT_SIDE && differenceInX > 0) {
+              newState = STATE_DEFAULT;
+            } else if (currentState === STATE_RIGHT_SIDE && differenceInX < 0) {
+              newState = STATE_DEFAULT;
+            }
+          }
+        } else {
+          newState = currentState;
+        }
+
+        changeState(newState);
+
+        swipeFrontElement.style.transition = 'all 150ms ease-out';
+      }
+
+      function changeState(newState) {
+        var transformStyle;
+        switch (newState) {
+          case STATE_DEFAULT:
+            currentXPosition = 0;
+            break;
+          case STATE_LEFT_SIDE:
+            currentXPosition = -(itemWidth - handleSize);
+            break;
+          case STATE_RIGHT_SIDE:
+          currentXPosition = (itemWidth - handleSize);
+            break;
+        }
+
+        transformStyle = `translateX(${currentXPosition}px)`;
+        swipeFrontElement.style.transform = transformStyle;
+
+        currentState = newState;
+      }
+
+      function getGesturePointFromEvent(evt) {
+        var point= {};
+
+        if (evt.targetTouches) {
+          point.x = evt.targetTouches[0].clientX;
+          point.y = evt.targetTouches[0].clientY;
+        } else {
+          point.x = evt.clientX;
+          point.y = evt.clientY;
+        }
+
+        return point;
+      }
+
+      function onAnimeFrame() {
+      if (!rafPending) {
+        return;
+      }
+
+      var differenceInX = initialTouchPos.x - lastTouchPos.x;
+      var newXTransform = `${currentXPosition - differenceInX}px`;
+      var transformStyle = `translateX(${newXTransform})`;
+      swipeFrontElement.style.transform = transformStyle;
+
+      rafPending = false;
+    }
+
+      swipeFrontElement.addEventListener('pointerdown', this.handleGestureStart, true);
+      swipeFrontElement.addEventListener('pointermove', this.handleGestureMove, true);
+      swipeFrontElement.addEventListener('pointerup', this.handleGestureEnd, true);
+      swipeFrontElement.addEventListener('pointercancel', this.handleGestureEnd, true);
+  }
+
+    var swipeRevealItems = [];
+
+    window.onload = function () {
+      var swipeRevealElements = document.querySelectorAll('.swipe-element');
+
+      for (let i = 0; i < swipeRevealElements.length; i++) {
+        swipeRevealItems.push(new SwipeRevealItem(swipeRevealElements[i]));
+      }
+    }
+  </script>
+</body>
+</html>

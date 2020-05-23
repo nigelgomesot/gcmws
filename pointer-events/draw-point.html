@@ -1,0 +1,40 @@
+<!-- REF: https://ourcodeworld.com/articles/read/49/draw-points-on-a-canvas-with-javascript-html5 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw Point</title>
+  <style>
+    #drawPointCanvas {
+      border: 1px solid black;
+      touch-action: none;
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="drawPointCanvas" width="300px" height="300px"></canvas>
+  <script>
+    function drawPoint(event) {
+      const rect = drawPointCanvas.getBoundingClientRect();
+
+      console.log(rect);
+      console.log(event);
+
+      const pointX = event.clientX - rect.left;
+      const pointY = event.clientY - rect.top;
+      const pointSize = 3;
+      const context = drawPointCanvas.getContext('2d');
+      context.fillStyle = "#ff0000";
+      context.beginPath();
+      context.arc(pointX, pointY, pointSize, 0, Math.PI * 2, true);
+      context.fill();
+    }
+
+    drawPointCanvas.addEventListener('pointerdown', event => {
+      drawPoint(event);
+    }, false);
+  </script>
+</body>
+</html>
